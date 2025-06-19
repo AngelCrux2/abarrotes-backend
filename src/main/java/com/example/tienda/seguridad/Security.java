@@ -28,7 +28,7 @@ public class Security {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Esto hace que el token esté disponible en JS
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/api/productos/**","/registro").permitAll()
+                        .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/api/productos/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
