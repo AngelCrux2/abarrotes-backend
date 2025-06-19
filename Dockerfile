@@ -1,11 +1,13 @@
-# Etapa de compilación
 FROM eclipse-temurin:24-jdk AS build
 WORKDIR /app
 
 # Copiar archivos del proyecto
 COPY . .
 
-# Construir el proyecto con Maven Wrapper (usa tu mvnw si lo tienes)
+# 🔧 Agregar permisos de ejecución al wrapper
+RUN chmod +x mvnw
+
+# Construir el proyecto con Maven Wrapper
 RUN ./mvnw clean package -DskipTests
 
 # Etapa de ejecución
@@ -20,3 +22,4 @@ EXPOSE 8080
 
 # Comando para correr el JAR
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
