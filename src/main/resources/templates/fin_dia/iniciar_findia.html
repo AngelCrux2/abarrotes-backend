@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIN DIA</title>
+
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css">
+    <link href="css/styles.css" rel="stylesheet" />
+    <link href="/css/barra.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans flex h-screen">
+
+<aside id="sidebar" class="fixed top-0 left-0 z-40 w-72 h-full md:h-screen transform -translate-x-full transition-transform duration-300 ease-in-out bg-gradient-to-b from-blue-50 to-white shadow-xl flex flex-col">
+
+    <div class="px-6 py-5 border-b border-blue-100 flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-500">
+        <h2 class="text-2xl font-bold text-white">Abarrotes</h2>
+        <button id="closeSidebar" class="md:hidden text-white hover:text-blue-200 text-3xl transition-colors duration-200">&times;</button>
+    </div>
+
+    <nav class="flex-1 px-4 py-4 flex flex-col space-y-3">
+        <form th:action="@{/venta}" method="get" class="h-full flex-1">
+            <button type="submit"
+                    class="w-full h-full flex flex-col items-center justify-center p-4 rounded-xl bg-white hover:bg-blue-50 border-2 border-blue-100 hover:border-blue-300 transition-all duration-300 shadow-md hover:shadow-lg">
+                <div class="p-2 md:p-3 bg-blue-100 rounded-full mb-2 md:mb-3 transition-colors duration-300">
+                    <img src="/img/inicio.svg" alt="Inicio" class="w-6 h-6 md:w-8 md:h-8"/>
+                </div>
+                <span class="text-base md:text-lg font-semibold text-blue-800">Inicio</span>
+            </button>
+        </form>
+
+        <form th:action="@{/productos/}" method="get" class="h-full flex-1">
+            <button type="submit"
+                    class="w-full h-full flex flex-col items-center justify-center p-4 rounded-xl bg-white hover:bg-green-50 border-2 border-green-100 hover:border-green-300 transition-all duration-300 shadow-md hover:shadow-lg">
+                <div class="p-2 md:p-3 bg-green-100 rounded-full mb-2 md:mb-3 transition-colors duration-300">
+                    <img src="/img/productos.svg" alt="Productos" class="w-6 h-6 md:w-8 md:h-8"/>
+                </div>
+                <span class="text-base md:text-lg font-semibold text-green-800">Productos</span>
+            </button>
+        </form>
+
+        <form th:action="@{/fin-dia}" method="get" class="h-full flex-1">
+            <button type="submit"
+                    class="w-full h-full flex flex-col items-center justify-center p-4 rounded-xl bg-white hover:bg-purple-50 border-2 border-purple-100 hover:border-purple-300 transition-all duration-300 shadow-md hover:shadow-lg">
+                <div class="p-2 md:p-3 bg-purple-100 rounded-full mb-2 md:mb-3 transition-colors duration-300">
+                    <img src="/img/fin_dia.svg" alt="Fin de Día" class="w-6 h-6 md:w-8 md:h-8"/>
+                </div>
+                <span class="text-base md:text-lg font-semibold text-purple-800">Fin Día</span>
+            </button>
+        </form>
+
+        <form th:action="@{/deudores}" method="get" class="h-full flex-1">
+            <button type="submit"
+                    class="w-full h-full flex flex-col items-center justify-center p-4 rounded-xl bg-white hover:bg-orange-50 border-2 border-orange-100 hover:border-orange-300 transition-all duration-300 shadow-md hover:shadow-lg">
+                <div class="p-2 md:p-3 bg-orange-100 rounded-full mb-2 md:mb-3 transition-colors duration-300">
+                    <img src="/img/Deudores.svg" alt="Deudores" class="w-6 h-6 md:w-8 md:h-8"/>
+                </div>
+                <span class="text-base md:text-lg font-semibold text-orange-800">Deudores</span>
+            </button>
+        </form>
+    </nav>
+</aside>
+
+<div id="mainContent" class="flex-1 transition-all duration-300 flex flex-col min-h-screen">
+
+    <div class="w-full bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg px-4 py-3 md:py-4 flex items-center justify-between sticky top-0 z-10 md:relative">
+        <div class="flex items-center space-x-3 md:space-x-4">
+            <button id="sidebarToggle" class="text-white hover:text-blue-200 text-3xl md:text-4xl focus:outline-none transition-colors duration-200">
+                &#9776;
+            </button>
+            <h1 class="text-xl md:text-2xl font-bold text-white">FIN DIA</h1>
+        </div>
+        <div class="flex items-center space-x-4 relative">
+            <div id="notificacionesWrapper" class="relative">
+                <button id="campanaNotificaciones" class="relative mt-1.5 text-white hover:text-yellow-300 focus:outline-none transition-colors duration-200">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <span id="campanaAlerta" class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white hidden"></span>
+                </button>
+
+                <div id="notificacionDropdown" class="hidden absolute right-0 mt-2 w-72 max-h-90 bg-white rounded-md shadow-2xl z-50 overflow-y-auto border border-gray-200">
+                    <div class="flex items-center justify-between px-3 py-2 border-b border-gray-100 bg-gray-50">
+                        <h3 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                            Notificaciones
+                        </h3>
+                        <span id="notiContador" class="text-xs text-gray-500">0 nuevas</span>
+                    </div>
+                    <div id="notificacionContenido" class="divide-y divide-gray-100">
+                        <div class="px-4 py-3 text-sm text-gray-700">No hay alertas por ahora.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="relative">
+                <button id="userMenuButton" class="flex items-center space-x-2 md:space-x-3 text-white hover:text-blue-200 focus:outline-none transition-colors duration-200 group">
+                    <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white bg-opacity-20 flex items-center justify-center group-hover:bg-opacity-30 transition-all duration-200">
+                        <span class="text-white font-medium text-sm md:text-base" th:text="${usuario.substring(0,1)}">N</span>
+                    </div>
+                    <span th:text="${usuario}" class="text-sm md:text-base font-medium hidden md:inline-block">Nombre del usuario</span>
+                    <svg class="w-4 h-4 ml-1 md:w-5 md:h-5 transform group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 overflow-hidden border border-gray-100">
+                    <form sec:authorize="hasRole('ADMIN')" th:action="@{/registro}" method="get">
+                        <button type="submit" class="w-full text-left px-4 py-3 hover:bg-blue-50 text-gray-700 flex items-center space-x-2 transition-colors duration-150">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            <span>Nuevo usuario</span>
+                        </button>
+                    </form>
+
+                    <div class="border-t border-gray-100"></div>
+
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="w-full text-left px-4 py-3 hover:bg-blue-50 text-gray-700 flex items-center space-x-2 transition-colors duration-150">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span>Cerrar sesión</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-1 overflow-y-auto px-8 py-4 bg-gradient-to-br from-gray-50 to-gray-100 flex items-start justify-center pb-32 md:pb-8 pt-16 md:pt-8">
+        <div class="w-full px-4 md:px-8 py-6 max-w-6xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col space-y-6">
+
+            <div class="flex items-center gap-2 mb-1">
+                <i class="fas fa-coins text-4xl text-indigo-600"></i>
+                <h2 class="text-3xl font-extrabold text-indigo-800 tracking-tight">Resumen de Fin Día</h2>
+            </div>
+
+            <div th:if="${!modoEdicion and editar}" class="bg-blue-50 p-4 rounded-lg mb-6 text-center">
+                <p class="text-blue-800" th:text="${mensaje}"></p>
+                <button type="button"
+                        onclick="document.getElementById('form-fin-dia').style.display='block'; this.style.display='none';"
+                        class="mt-3 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg">
+                    <i class="fas fa-edit mr-2"></i> Editar Fin Día
+                </button>
+                <a href="/reporte-diario" target="_blank"
+                   class="inline-block px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 mt-4">
+                    📄 Descargar Reporte Diario (PDF)
+                </a>
+            </div>
+
+            <form th:action="@{/iniciar-fin-dia}" method="post" id="form-fin-dia"
+                  th:style="${!modoEdicion and editar} ? 'display:none;' : 'display:block;'"
+                  class="space-y-8">
+
+                <input type="hidden" name="fecha" th:value="${fecha}"/>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+
+                    <div class="bg-gradient-to-br from-green-50 to-white p-5 rounded-xl border-l-4 border-green-500 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="block text-sm font-semibold text-gray-600 mb-1">VENTAS DEL DÍA</span>
+                                <span class="text-2xl font-bold text-green-700"
+                                      th:text="'$' + ${#numbers.formatDecimal(ventasTotales != null ? ventasTotales : 0, 2, 2)}">$0.00</span>
+                            </div>
+                            <i class="fas fa-chart-line text-green-500 text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-blue-50 to-white p-5 rounded-xl border-l-4 border-blue-500 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="block text-sm font-semibold text-gray-600 mb-1">TRANSFERENCIAS</span>
+                                <span class="text-2xl font-bold text-blue-700"
+                                      th:text="'$' + ${#numbers.formatDecimal(transferencias != null ? transferencias : 0, 2, 2)}">$0.00</span>
+                            </div>
+                            <i class="fas fa-exchange-alt text-blue-500 text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-amber-50 to-white p-5 rounded-xl border-l-4 border-amber-500 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="block text-sm font-semibold text-gray-600 mb-1">DINERO EN CAJA</span>
+                                <span id="dineroCaja" class="text-2xl font-bold text-amber-700"
+                                      th:text="'$' + ${#numbers.formatDecimal(dineroEnCaja != null ? dineroEnCaja : 0, 2, 2)}">$0.00</span>
+                            </div>
+                            <i class="fas fa-cash-register text-amber-500 text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-red-50 to-white p-5 rounded-xl border-l-4 border-red-500 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="block text-sm font-semibold text-gray-600 mb-1">GASTOS DEL DÍA</span>
+                                <span class="text-2xl font-bold text-red-700"
+                                      th:text="'$' + ${#numbers.formatDecimal(gastos != null ? gastos : 0, 2, 2)}">$0.00</span>
+                            </div>
+                            <i class="fas fa-receipt text-red-500 text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-purple-50 to-white p-5 rounded-xl border-l-4 border-purple-500 shadow-sm">
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">SALDO INICIAL</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                            <input type="number" step="0.01" min="0"
+                                   name="saldoInicialEditado" id="saldoInicialEditado"
+                                   th:value="${finDia != null ? finDia.saldoInicial : saldoInicialSugerido}"
+                                   th:attr="data-valor=${finDia != null ? finDia.saldoInicial : saldoInicialSugerido}"
+                                   th:readonly="${editar}"
+                                   class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                                   required />
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="ventas" th:attr="data-valor=${ventasFisicas != null ? ventasFisicas : 0}"/>
+                    <input type="hidden" id="gastos" th:attr="data-valor=${gastos != null ? gastos : 0}"/>
+
+                    <div class="bg-gradient-to-br from-purple-50 to-white p-5 rounded-xl border-l-4 border-purple-500 shadow-sm">
+                        <label for="montoRetiro" class="block text-sm font-semibold text-gray-600 mb-2">
+                            <i class="fas fa-vault mr-2 text-purple-500"></i> MONTO A RETIRAR PARA BÓVEDA
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                            <input type="number" step="0.01" min="0" name="montoRetiro" id="montoRetiro"
+                                   class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                                   required/>
+                        </div>
+                        <div id="errorRetiro" class="text-red-600 text-sm mt-1 hidden"></div>
+                    </div>
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-3 rounded-xl font-medium hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span th:text="${editar} ? 'ACTUALIZAR FIN DE DÍA' : 'FINALIZAR FIN DE DÍA'"></span>
+                </button>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script src="/js/barra.js"></script>
+<script src="/js/findia.js"></script>
+
+</body>
+
+</html>

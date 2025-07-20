@@ -39,7 +39,11 @@ public class Usuarios implements UserDetails {
         }
     }
 
-    // Métodos obligatorios de UserDetails
+    public enum Rol {
+        ADMIN,
+        USUARIO
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
@@ -52,7 +56,7 @@ public class Usuarios implements UserDetails {
 
     @Override
     public String getUsername() {
-        return nombre; // o un campo como email si lo agregas
+        return nombre;
     }
 
     @Override
@@ -119,12 +123,3 @@ public class Usuarios implements UserDetails {
         this.rol = rol;
     }
 }
-
-
-
-enum Rol {
-    ADMIN,
-    USUARIO,
-    INVITADO
-}
-

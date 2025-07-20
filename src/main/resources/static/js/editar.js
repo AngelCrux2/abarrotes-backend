@@ -1,111 +1,117 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const resultadosEditarDiv = document.getElementById('resultadosEditar');
+  let idAEliminar = null;
 
-    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+  const buscador = document.getElementById('buscadorEditar');
+  const contenedorResultados = document.getElementById('resultadosBusqueda');
 
-    const modal = document.getElementById('modalConfirmacion');
-    const btnCancelar = document.getElementById('btnCancelar');
-    const btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar');
-    let idProductoAEliminar = null;
+  const modal = document.getElementById('modalEliminar');
+  const btnCancelar = document.getElementById('cancelarEliminar');
+  const btnConfirmar = document.getElementById('confirmarEliminar');
 
-    const mostrarError = (mensaje) => {
-        const divError = document.getElementById('mensajeError');
-        const textoError = document.getElementById('mensajeErrorTexto');
-        textoError.textContent = mensaje;
-        divError.classList.remove('hidden');
-        setTimeout(() => {
-            divError.classList.add('hidden');
-        }, 4000);
-    };
+  const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+  const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
 
-    // Función para renderizar productos
-    const renderizarProductos = (productos) => {
-        resultadosEditarDiv.innerHTML = '';
+  let timeout = null;
 
-        if (productos.length === 0) {
-            resultadosEditarDiv.innerHTML = `
-                <p class="text-center text-gray-600 bg-yellow-100 p-3 rounded">
-                    No se encontraron productos.
-                </p>`;
-            return;
-        }
+  const mostrarError = (mensaje) => {
+    alert('Error: ' + mensaje);
+  };
 
-        productos.forEach(p => {
-            const card = document.createElement('div');
-            card.className = 'border rounded-lg p-4 shadow bg-white space-y-2';
-            card.setAttribute('data-id', p.id);
+  function asignarEventosEliminar() {
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+      btn.removeEventListener('click', handleEliminarClick);
+      btn.addEventListener('click', handleEliminarClick);
+    });
+  }
 
-            card.innerHTML = `
-                <h4 class="font-semibold text-lg text-gray-700">${p.nombre}</h4>
-                <p class="text-sm text-gray-500">Código: ${p.codigo}</p>
-                <p class="text-sm text-gray-500">Precio: $${p.costo}</p>
-                <div class="flex space-x-2">
-                    <button onclick="window.location.href='/editarproducto/${p.id}'"
-                            class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium px-3 py-1 rounded">
-                        Editar
-                    </button>
+  function handleEliminarClick(event) {
+    idAEliminar = event.currentTarget.getAttribute('data-id');
+    modal.classList.remove('hidden');
+  }
 
-                    <button data-id="${p.id}"
-                            class="btn-eliminar bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-3 py-1 rounded">
-                        Eliminar
-                    </button>
-                </div>
-            `;
+  function renderizarResultados(productos) {
+    contenedorResultados.innerHTML = '';
 
-            resultadosEditarDiv.appendChild(card);
-        });
+    if (productos.length === 0) {
+      contenedorResultados.innerHTML = `
+        <p class="text-center col-span-full text-gray-500 bg-yellow-100 p-3 rounded">
+          No se encontraron productos.
+        </p>
+      `;
+      return;
+    }
 
-        // Asociar eventos eliminar
-        document.querySelectorAll('.btn-eliminar').forEach(btn => {
-            btn.addEventListener('click', e => {
-                idProductoAEliminar = e.target.getAttribute('data-id');
-                modal.classList.remove('hidden');
-            });
-        });
-    };
-
-    // Cargar todos los productos al iniciar
-    fetch('/api/productos/todos')
-        .then(response => {
-            if (!response.ok) throw new Error("Error cargando productos");
-            return response.json();
-        })
-        .then(productos => {
-            renderizarProductos(productos);
-        })
-        .catch(err => {
-            mostrarError(err.message);
-        });
-
-    // Modal botones
-    btnCancelar.addEventListener('click', () => {
-        modal.classList.add('hidden');
-        idProductoAEliminar = null;
+    productos.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'bg-white p-4 rounded-xl shadow border border-gray-200 space-y-2';
+      div.setAttribute('data-id', p.id);
+      div.innerHTML = `
+        <h3 class="text-lg font-bold text-gray-800">${p.nombre}</h3>
+        <p class="text-sm text-gray-600">
+          Código: ${p.codigo}<br>
+          Cantidad: ${p.cantidad}<br>
+          Precio: $${p.costo}
+        </p>
+        <div class="flex gap-2 justify-end pt-2">
+          <a href="/productos/editarproducto/${p.id}" class="px-4 py-2 bg-yellow-400 text-white rounded hover:bg-yellow-500">Editar</a>
+          <button class="btn-eliminar px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600" data-id="${p.id}">Eliminar</button>
+        </div>
+      `;
+      contenedorResultados.appendChild(div);
     });
 
-    btnConfirmarEliminar.addEventListener('click', () => {
-        if (!idProductoAEliminar) return;
+    asignarEventosEliminar();
+  }
 
-        fetch(`/api/productos/${idProductoAEliminar}`, {
-            method: 'DELETE',
+  buscador?.addEventListener('input', () => {
+    const valor = buscador.value.trim();
+    clearTimeout(timeout);
+
+    timeout = setTimeout(() => {
+      if (valor === '') {
+        contenedorResultados.innerHTML = '';
+        return;
+      }
+
+      fetch(`/api/productos/buscar-parcial?valor=${encodeURIComponent(valor)}&limite=30`)
+        .then(res => {
+          if (!res.ok) throw new Error("Error al buscar productos");
+          return res.json();
+        })
+        .then(renderizarResultados)
+        .catch(err => mostrarError(err.message));
+    }, 300);
+  });
+
+  btnConfirmar?.addEventListener('click', () => {
+    if (!idAEliminar) return;
+
+    fetch(`/api/productos/${idAEliminar}`, {
+      method: 'DELETE',
             headers: {
-                [csrfHeader]: csrfToken
+              'Content-Type': 'application/json',
+              [csrfHeader]: csrfToken
             }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error("No se pudo eliminar el producto.");
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('No se pudo eliminar el producto');
 
-            const card = document.querySelector(`div[data-id="${idProductoAEliminar}"]`);
-            if (card) card.remove();
+      const card = document.querySelector(`[data-id="${idAEliminar}"]`)?.closest('.bg-white');
+      if (card) card.remove();
 
-            modal.classList.add('hidden');
-            idProductoAEliminar = null;
-        })
-        .catch(err => {
-            modal.classList.add('hidden');
-            mostrarError(err.message);
-        });
+      modal.classList.add('hidden');
+      idAEliminar = null;
+    })
+    .catch(err => {
+      modal.classList.add('hidden');
+      mostrarError(err.message);
     });
+  });
 
+  btnCancelar?.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    idAEliminar = null;
+  });
+
+  asignarEventosEliminar();
 });

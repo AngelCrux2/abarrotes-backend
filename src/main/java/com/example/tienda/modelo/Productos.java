@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ public class Productos {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String nombre;
 
     @Column(unique = true)
@@ -27,7 +29,22 @@ public class Productos {
 
     private Integer cantidad;
 
-    private String caducidad;
+    @DateTimeFormat(pattern = "yyyy-MM-dd") // 👈 esto es clave
+    private LocalDate caducidad;
+
+    @ManyToOne
+    @JoinColumn(name = "departamento_id")
+    private Departamento departamento;
+
+    private Integer stockMinimo = 5;
+
+    public Integer getStockMinimo() {
+        return stockMinimo;
+    }
+
+    public void setStockMinimo(Integer stockMinimo) {
+        this.stockMinimo = stockMinimo;
+    }
 
     public Long getId() {
         return id;
@@ -69,11 +86,19 @@ public class Productos {
         this.cantidad = cantidad;
     }
 
-    public String getCaducidad() {
+    public LocalDate getCaducidad() {
         return caducidad;
     }
 
-    public void setCaducidad(String caducidad) {
+    public void setCaducidad(LocalDate caducidad) {
         this.caducidad = caducidad;
+    }
+
+    public Departamento getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(Departamento departamento) {
+        this.departamento = departamento;
     }
 }

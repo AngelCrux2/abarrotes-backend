@@ -1,67 +1,88 @@
+let carrito = [];
+
 document.addEventListener("DOMContentLoaded", function () {
     const input = document.getElementById('buscador');
     const resultadosDiv = document.getElementById('resultados');
-    const mensajeDiv = document.getElementById('mensaje');
     const botonCompra = document.getElementById('btn-comprar');
+    const botonDeuda = document.getElementById('btn-añadir-deuda');
+    const botonTransferencia = document.getElementById('btn-transferencia');
 
-    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || '';
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || '';
 
-    let carrito = [];
+    let temporizadorCodigo;
 
-   input.addEventListener('input', () => {
-       const valor = input.value.trim();
+    input.addEventListener('input', () => {
+        const valor = input.value.trim();
 
-       if (valor.length >= 2) {
-           fetch(`/api/productos/buscar-parcial?valor=${encodeURIComponent(valor)}&limite=5`)
-               .then(response => {
-                   if (!response.ok) throw new Error("Error en la búsqueda");
-                   return response.json();
-               })
-               .then(productos => {
-                   resultadosDiv.innerHTML = '';
+        if (valor.length >= 2) {
+            fetch(`/api/productos/buscar-parcial?valor=${encodeURIComponent(valor)}&limite=5`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Error en la búsqueda");
+                    return response.json();
+                })
+                .then(productos => mostrarResultados(productos))
+                .catch(() => {});
+        } else {
+            resultadosDiv.innerHTML = "";
+        }
 
-                   if (productos.length === 0) {
-                       resultadosDiv.innerHTML = `
-                           <p class="text-gray-600 text-center p-4 bg-yellow-100 rounded">No se encontraron productos.</p>`;
-                       return;
-                   }
+        clearTimeout(temporizadorCodigo);
+        if (valor.length >= 4) {
+            temporizadorCodigo = setTimeout(() => {
+                fetch(`/api/productos/buscar-codigo?codigo=${encodeURIComponent(valor)}`)
+                    .then(response => {
+                        if (!response.ok) return null;
+                        return response.json();
+                    })
+                    .then(producto => {
+                        if (producto) {
+                            agregarAlCarrito(producto);
+                            input.value = "";
+                            resultadosDiv.innerHTML = "";
+                        }
+                    })
+                    .catch(() => {});
+            }, 500);
+        }
+    });
 
-                   productos.forEach(p => {
-                       const card = document.createElement('div');
-                       card.className = `flex flex-col md:flex-row justify-between items-start md:items-center
-                                         bg-white border border-gray-300 rounded-lg p-4 mb-3 shadow`;
+    function mostrarResultados(productos) {
+        resultadosDiv.innerHTML = '';
 
-                       card.innerHTML = `
-                           <div class="flex-1 space-y-1">
-                               <h5 class="text-lg font-semibold text-gray-800">${p.nombre}</h5>
-                               <p class="text-sm text-gray-600">
-                                   <span class="hidden md:inline">Código: <span class="font-medium">${p.codigo}</span> | </span>
-                                   Precio: <span class="text-green-700 font-semibold">$${p.costo}</span> |
-                                   Stock: <span class="text-blue-700 font-semibold">${p.cantidad}</span>
-                               </p>
-                           </div>
-                           <button class="mt-2 md:mt-0 md:ml-4 px-4 py-2 bg-blue-600 text-white font-semibold
-                                          rounded hover:bg-blue-700 transition seleccionar-btn">
-                               + Agregar
-                           </button>
-                       `;
+        if (productos.length === 0) {
+            resultadosDiv.innerHTML = `
+                <p class="text-gray-600 text-center p-4 bg-yellow-100 rounded">No se encontraron productos.</p>`;
+            return;
+        }
 
-                       card.querySelector('.seleccionar-btn').addEventListener('click', () => {
-                           agregarAlCarrito(p);
-                       });
+        productos.forEach(p => {
+            const card = document.createElement('div');
+            card.className = `flex flex-col md:flex-row justify-between items-start md:items-center
+                            bg-white border border-gray-300 rounded-lg p-4 mb-3 shadow`;
 
-                       resultadosDiv.appendChild(card);
-                   });
-               })
-               .catch(err => {
-                   resultadosDiv.innerHTML = `<p class="text-red-600 bg-red-100 p-3 rounded">${err.message}</p>`;
-               });
-       } else {
-           resultadosDiv.innerHTML = "";
-       }
-   });
+            card.innerHTML = `
+                <div class="flex-1 space-y-1">
+                    <h5 class="text-lg font-semibold text-gray-800">${p.nombre}</h5>
+                    <p class="text-sm text-gray-600">
+                        <span class="hidden md:inline">Código: <span class="font-medium">${p.codigo}</span> | </span>
+                        Precio: <span class="text-green-700 font-semibold">$${p.costo}</span> |
+                        Stock: <span class="text-blue-700 font-semibold">${p.cantidad}</span>
+                    </p>
+                </div>
+                <button class="mt-2 md:mt-0 md:ml-4 px-4 py-2 bg-blue-600 text-white font-semibold
+                            rounded hover:bg-blue-700 transition seleccionar-btn">
+                    + Agregar
+                </button>
+            `;
 
+            card.querySelector('.seleccionar-btn').addEventListener('click', () => {
+                agregarAlCarrito(p);
+            });
+
+            resultadosDiv.appendChild(card);
+        });
+    }
 
     function agregarAlCarrito(producto) {
         const existente = carrito.find(p => p.codigo === producto.codigo);
@@ -82,26 +103,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function mostrarCarrito() {
-        let html = `
-            <h5 class="text-lg font-bold mb-2">Carrito:</h5>
-            <div class="w-full overflow-x-auto">
-                <table class="w-full border border-gray-300 text-sm mb-4">
-                    <thead class="bg-gray-100 text-left">
-                        <tr>
-                            <th class="px-1 py-1 border whitespace-nowrap hidden md:table-cell">Código</th>
-                            <th class="px-1 py-1 border whitespace-nowrap">Producto</th>
-                            <th class="px-1 py-1 border whitespace-nowrap text-center">Cantidad</th>
-                            <th class="px-1 py-1 border whitespace-nowrap">Subtotal</th>
-                            <th class="px-1 py-1 border whitespace-nowrap text-center">Eliminar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
+        const tbody = document.getElementById('tabla-carrito');
+        const totalCarrito = document.getElementById('total-carrito');
 
+        if (!tbody || !totalCarrito) {
+            console.error("Elementos del carrito no encontrados");
+            return;
+        }
+
+        let html = '';
         let total = 0;
 
         if (carrito.length === 0) {
-            html += `
+            html = `
                 <tr>
                     <td colspan="5" class="text-center px-2 py-2 text-gray-500">Tu carrito está vacío.</td>
                 </tr>
@@ -110,6 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
             carrito.forEach((p, index) => {
                 const subtotal = (p.costo || 0) * p.cantidadSeleccionada;
                 total += subtotal;
+
                 html += `
                     <tr>
                         <td class="px-1 py-1 border hidden md:table-cell">${p.codigo}</td>
@@ -129,64 +144,145 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        html += `
-                    </tbody>
-                </table>
-            </div>
-            <p class="text-right font-semibold text-sm">Total: $${total.toFixed(2)}</p>
-        `;
-
-        mensajeDiv.innerHTML = html;
+        tbody.innerHTML = html;
+        totalCarrito.textContent = `Total: $${total.toFixed(2)}`;
     }
 
-
-   function cambiarCantidadInput(index, nuevaCantidad) {
-       const cantidad = parseInt(nuevaCantidad);
-       if (!isNaN(cantidad) && cantidad > 0) {
-           carrito[index].cantidadSeleccionada = cantidad;
-           mostrarCarrito();
-       }
-   }
+    function cambiarCantidadInput(index, nuevaCantidad) {
+        const cantidad = parseInt(nuevaCantidad);
+        if (!isNaN(cantidad) && cantidad > 0) {
+            carrito[index].cantidadSeleccionada = cantidad;
+            mostrarCarrito();
+        } else {
+            mostrarCarrito();
+        }
+    }
 
     function eliminarProducto(index) {
         carrito.splice(index, 1);
         mostrarCarrito();
     }
-    window.cambiarCantidadInput = cambiarCantidadInput;
-    window.eliminarProducto = eliminarProducto;
 
-    botonCompra.addEventListener('click', () => {
-        if (carrito.length === 0) {
-            mensajeDiv.innerHTML = `<p style="color:red;">Agrega productos primero.</p>`;
+    function togglePanelVerduras() {
+        const panel = document.getElementById("panel-verduras");
+        panel.classList.toggle("hidden");
+    }
+
+    function agregarVerduraAVenta() {
+        const nombre = document.getElementById("verdura").value;
+        const costo = parseFloat(document.getElementById("costoVerdura").value);
+
+        if (isNaN(costo) || costo <= 0) {
             return;
         }
 
-        const headers = {
-            'Content-Type': 'application/json',
-            [csrfHeader]: csrfToken
-        };
+        carrito.push({
+            nombre: nombre,
+            codigo: "VERDURA_" + nombre.toUpperCase() + "_" + Date.now(),
+            costo: costo,
+            cantidadSeleccionada: 1
+        });
 
-        fetch(`/api/productos/comprar`, {
+        mostrarCarrito();
+
+        document.getElementById("costoVerdura").value = "";
+        document.getElementById("panel-verduras").classList.add("hidden");
+    }
+
+   botonCompra.addEventListener('click', () => {
+       if (carrito.length === 0) {
+           return;
+       }
+
+       fetch('/api/productos/comprar', {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json',
+               [csrfHeader]: csrfToken
+           },
+           body: JSON.stringify(carrito)
+       })
+       .then(res => {
+           if (!res.ok) throw new Error("Error al registrar la compra");
+           return res.text();
+       })
+       .then(msg => {
+           carrito = [];
+           mostrarCarrito();
+
+           const alerta = document.getElementById('alerta-venta');
+           alerta.classList.remove('hidden');
+
+           setTimeout(() => {
+               alerta.classList.add('hidden');
+           }, 2000);
+       })
+       .catch(err => {
+           console.error("Error al registrar la compra:", err);
+       });
+   });
+
+
+    botonDeuda.addEventListener('click', () => {
+        if (carrito.length === 0) {
+            alert("El carrito está vacío.");
+            return;
+        }
+
+        fetch('/deudores/temp-carrito', {
             method: 'POST',
-            headers: headers,
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
             body: JSON.stringify(carrito)
         })
-            .then(response => {
-                if (!response.ok) throw new Error("Error al procesar la compra");
-                return response.json();
-            })
-            .then(data => {
-                mensajeDiv.innerHTML = `<p style="color:green;">Compra realizada con éxito.</p>`;
-                carrito = [];
-                mostrarCarrito();
-                input.value = "";
-                resultadosDiv.innerHTML = "";
-            })
-            .catch(err => {
-                mensajeDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
-            });
+        .then(res => {
+            if (!res.ok) throw new Error("No se pudo guardar el carrito");
+            window.location.href = '/deudores/seleccionar';
+        })
+        .catch(err => {
+            alert("Error al enviar productos a deuda.");
+        });
     });
-    mostrarCarrito(); // Mostrar la tabla al cargar la página
+    botonTransferencia.addEventListener('click', () => {
+        if (carrito.length === 0) {
+            alert("El carrito está vacío.");
+            return;
+        }
+
+        fetch('/api/productos/comprar-transferencia', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify(carrito)
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Error al registrar la transferencia");
+            return res.text();
+        })
+        .then(msg => {
+            carrito = [];
+            mostrarCarrito();
+            const alerta = document.getElementById('alerta-transferencia');
+               alerta.classList.remove('hidden');
+
+               setTimeout(() => {
+                   alerta.classList.add('hidden');
+               }, 2000);
+        })
+        .catch(err => {
+            mostrarAlertaEmergente("Ocurrió un error con la transferencia.", "error");
+        });
+    });
+
+    window.cambiarCantidadInput = cambiarCantidadInput;
+    window.eliminarProducto = eliminarProducto;
+    window.togglePanelVerduras = togglePanelVerduras;
+    window.agregarVerduraAVenta = agregarVerduraAVenta;
+    window.mostrarCarrito = mostrarCarrito;
+
+    mostrarCarrito();
 });
-
-

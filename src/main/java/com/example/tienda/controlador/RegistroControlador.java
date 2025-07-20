@@ -24,7 +24,7 @@ public class RegistroControlador {
             model.addAttribute("usuario", usuario.getNombre() + " " + usuario.getApellido());
         }
 
-        return "registro";
+        return "login/registro";
     }
 
     @PostMapping("/registro")
@@ -36,12 +36,11 @@ public class RegistroControlador {
         model.addAttribute("mensaje", "Usuario registrado con éxito");
         model.addAttribute("nuevoUsuario", new Usuarios());
 
-        // 👇 Esto es lo que falta para que NO se borre el nombre del usuario en la vista
         if (authentication != null && authentication.getPrincipal() instanceof Usuarios usuarioLogeado) {
             model.addAttribute("usuario", usuarioLogeado.getNombre() + " " + usuarioLogeado.getApellido());
         }
 
-        return "registro";
+        return "login/registro";
     }
 
 

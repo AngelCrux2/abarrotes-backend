@@ -1,0 +1,231 @@
+#notificacionesWrapper {
+  position: relative;
+}
+
+#notificacionesWrapper #campanaNotificaciones {
+  position: relative;
+  margin-top: 0.375rem;
+  color: white;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-size: 1.75rem;
+}
+
+#notificacionesWrapper #campanaNotificaciones:hover {
+  color: #fbbf24;
+}
+
+#notificacionesWrapper #campanaNotificaciones:focus {
+  outline: none;
+}
+
+#notificacionesWrapper #campanaNotificaciones svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+#notificacionesWrapper #campanaAlerta {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: block;
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background-color: #ef4444;
+  box-shadow: 0 0 0 2px white;
+}
+
+#notificacionesWrapper .hidden {
+  display: none !important;
+}
+
+#notificacionesWrapper #notificacionDropdown {
+  position: absolute;
+  right: 0;
+  margin-top: 0.5rem;
+  width: 18rem;
+  max-width: 20rem;
+  background-color: white;
+  border-radius: 0.375rem;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  z-index: 50;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  max-height: calc(100vh - 4rem);
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  #notificacionesWrapper #notificacionDropdown {
+    max-width: 24rem;
+    max-height: 24rem;
+    padding-left: 0;
+    padding-right: 0;
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+}
+
+#notificacionesWrapper #notificacionDropdown > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+}
+
+#notificacionesWrapper #notificacionDropdown > div:first-child h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+#notificacionesWrapper #notificacionDropdown > div:first-child h3 svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke: #fbbf24;
+  fill: none;
+  stroke-width: 2;
+}
+
+#notificacionesWrapper #notiContador {
+  font-size: 0.75rem;
+  color: #6b7280;
+  min-width: 50px;
+  text-align: right;
+}
+
+#notificacionesWrapper #notificacionContenido {
+  border-top: none;
+  color: #374151;
+}
+
+#notificacionesWrapper #notificacionContenido > div {
+  padding: 0.75rem 0.75rem;
+}
+
+#notificacionesWrapper .hover-bg-gray:hover {
+  background-color: #f9fafb;
+}
+
+#notificacionesWrapper .hover-bg-yellow:hover {
+  background-color: #fffbeb;
+}
+
+#notificacionesWrapper .hover-bg-red:hover {
+  background-color: #fef2f2;
+}
+
+#notificacionesWrapper .text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+#notificacionesWrapper .text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+#notificacionesWrapper .font-medium {
+  font-weight: 500;
+}
+
+#notificacionesWrapper .text-gray-700 {
+  color: #374151;
+}
+
+#notificacionesWrapper .text-gray-500 {
+  color: #6b7280;
+}
+
+#notificacionesWrapper .text-red-500 {
+  color: #ef4444;
+}
+
+#notificacionesWrapper .text-yellow-500 {
+  color: #fbbf24;
+}
+
+#notificacionesWrapper .text-red-600 {
+  color: #dc2626;
+}
+
+#notificacionesWrapper .font-semibold {
+  font-weight: 600;
+}
+
+#notificacionesWrapper .icon-red {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke: #ef4444;
+  fill: none;
+  stroke-width: 2;
+}
+
+#notificacionesWrapper .icon-yellow {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke: #fbbf24;
+  fill: none;
+  stroke-width: 2;
+}
+
+#notificacionesWrapper .icon-red-dark {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke: #dc2626;
+  fill: none;
+  stroke-width: 2;
+}
+
+#notificacionesWrapper .flex {
+  display: flex;
+}
+
+#notificacionesWrapper .items-start {
+  align-items: flex-start;
+}
+
+#notificacionesWrapper .items-center {
+  align-items: center;
+}
+
+#notificacionesWrapper .justify-between {
+  justify-content: space-between;
+}
+
+#notificacionesWrapper .gap-3 {
+  gap: 0.75rem;
+}
+
+#notificacionesWrapper .mt-1 {
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 640px) {
+  #notificacionesWrapper #notificacionDropdown {
+    width: 90vw !important;
+    left: 5vw !important;
+    right: 5vw !important;
+    max-height: 60vh !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    position: fixed !important;
+    top: 3.5rem !important;
+    z-index: 10000 !important;
+  }
+}
+
