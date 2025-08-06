@@ -28,9 +28,22 @@ public class ProductosControlador {
     private ReporteProductoService reporteService;
 
     private void agregarDatosUsuario(Model model, Authentication auth) {
-        if (auth != null && auth.getPrincipal() instanceof Usuarios usuario) {
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof Usuarios usuario) {
             model.addAttribute("usuario", usuario.getNombre() + " " + usuario.getApellido());
         }
+    }
+
+    private Productos verificarProductoDuplicado(Productos producto) {
+        Productos porCodigo = productosService.buscarPorCodigo(producto.getCodigo());
+        Productos porNombre = productosService.buscarPorNombre(producto.getNombre());
+
+        if (porCodigo != null && !porCodigo.getId().equals(producto.getId())) {
+            return porCodigo;
+        }
+        if (porNombre != null && !porNombre.getId().equals(producto.getId())) {
+            return porNombre;
+        }
+        return null;
     }
 
     @GetMapping("/")
@@ -47,7 +60,9 @@ public class ProductosControlador {
         return "producto/agregarproductos";
     }
     @PostMapping("/nuevo")
-    public String productos_agregar_nav(@ModelAttribute("producto") Productos producto, Model model, Authentication auth) {
+    public String productos_agregar_nav(@ModelAttribute("producto") Productos producto,
+                                        RedirectAttributes redirectAttributes,
+                                        Model model, Authentication auth) {
         agregarDatosUsuario(model, auth);
 
         if (producto.getNombre() != null) {
@@ -55,33 +70,24 @@ public class ProductosControlador {
         }
 
         try {
+            Productos duplicado = verificarProductoDuplicado(producto);
+            if (duplicado != null) {
+                // Pasamos el duplicado como atributo para mostrar modal en la vista
+                redirectAttributes.addFlashAttribute("productoExistente", duplicado);
+                redirectAttributes.addFlashAttribute("mostrarModal", true);
+                redirectAttributes.addFlashAttribute("producto", producto);
+                return "redirect:/productos/nuevo";
+            }
+
             productosService.guardarOActualizarProducto(producto);
-            model.addAttribute("mensaje", "Producto guardado correctamente.");
-            model.addAttribute("producto", new Productos());
+            redirectAttributes.addFlashAttribute("mensaje", "Producto guardado correctamente.");
+            return "redirect:/productos/nuevo";
+
         } catch (DataIntegrityViolationException e) {
-            Productos existentePorCodigo = productosService.buscarPorCodigo(producto.getCodigo());
-
-            Productos existentePorNombre = productosService.buscarPorNombre(producto.getNombre());
-
-            Productos productoExistente = null;
-
-            if (existentePorCodigo != null) {
-                productoExistente = existentePorCodigo;
-            } else if (existentePorNombre != null) {
-                productoExistente = existentePorNombre;
-            }
-
-            if (productoExistente != null) {
-                model.addAttribute("productoExistente", productoExistente);
-                model.addAttribute("mostrarModal", true);
-            } else {
-                model.addAttribute("error", "El producto ya existe, pero no se pudo recuperar.");
-            }
-
-            model.addAttribute("producto", new Productos());
+            redirectAttributes.addFlashAttribute("error", "Error al guardar el producto: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("producto", producto);
+            return "redirect:/productos/nuevo";
         }
-
-        return "redirect:/productos/nuevo";
     }
 
     @GetMapping("/inventario")
@@ -110,16 +116,17 @@ public class ProductosControlador {
     @PostMapping("/editarproducto")
     public String guardarProductoEditado(@ModelAttribute("producto") Productos producto,
                                          RedirectAttributes redirectAttributes,
-                                         Model model) {
-        try {
-            Productos duplicado = productosService.buscarPorCodigo(producto.getCodigo());
+                                         Model model, Authentication auth) {
+        agregarDatosUsuario(model, auth);
 
-            if (duplicado != null && !duplicado.getId().equals(producto.getId())) {
+        try {
+            Productos duplicado = verificarProductoDuplicado(producto);
+            if (duplicado != null) {
                 model.addAttribute("productoExistente", duplicado);
                 model.addAttribute("mostrarModal", true);
                 model.addAttribute("producto", producto);
                 model.addAttribute("departamentos", departamentoService.findAll());
-                return "editarproducto";
+                return "producto/editarproducto";
             }
 
             productosService.guardarOActualizarProducto(producto);

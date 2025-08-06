@@ -34,6 +34,7 @@ public class ProductosService {
         return productosRepositorio.buscarPorNombreOCodigoParcial(valor, pageable);
     }
 
+    @Transactional
     public Productos guardarOActualizarProducto(Productos producto) {
         return productosRepositorio.save(producto);
     }
@@ -43,6 +44,7 @@ public class ProductosService {
                 .orElse(null);
     }
 
+    @Transactional
     public void eliminarPorId(Long id) {
         if (productosRepositorio.existsById(id)) {
             productosRepositorio.deleteById(id);

@@ -5,6 +5,7 @@ import com.example.tienda.repositorio.UsuariosRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -17,6 +18,7 @@ public class UsuariosService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Transactional
     public Usuarios guardarUsuario(Usuarios usuarios) {
         usuarios.setStatus(1);
         String contraseñaEncryptada = passwordEncoder.encode(usuarios.getPassword());

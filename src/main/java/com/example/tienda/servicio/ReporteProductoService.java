@@ -6,6 +6,7 @@ import com.example.tienda.repositorio.ProductoMVendidoRepositorio;
 import com.example.tienda.repositorio.ProductosRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ public class ReporteProductoService {
     @Autowired
     private ProductosRepositorio productosRepositorio;
 
+    @Transactional(readOnly = true)
     public List<ProductoMVendido> obtenerProductosMasVendidosPorSemana() {
         List<Object[]> resultados = reporteRepo.obtenerProductosMasVendidosPorSemanaRaw();
         Map<Integer, ProductoMVendido> masVendidosPorSemana = new HashMap<>();
@@ -36,6 +38,7 @@ public class ReporteProductoService {
 
         return new ArrayList<>(masVendidosPorSemana.values());
     }
+    @Transactional(readOnly = true)
     public List<ProductoMVendido> obtenerTodosLosProductosVendidosPorSemana() {
         List<Object[]> resultados = reporteRepo.obtenerProductosMasVendidosPorSemanaRaw();
         List<ProductoMVendido> lista = new ArrayList<>();
@@ -51,6 +54,7 @@ public class ReporteProductoService {
         return lista;
     }
 
+    @Transactional(readOnly = true)
     public List<Productos> obtenerProductosNoVendidosEnUltimos7Dias() {
         return productosRepositorio.findProductosNoVendidosEnUltimos7Dias();
     }

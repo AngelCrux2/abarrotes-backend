@@ -8,6 +8,7 @@ import com.example.tienda.repositorio.ProductosRepositorio;
 import com.example.tienda.servicio.DeudorService;
 import com.example.tienda.servicio.MovimientoService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/deudores")
@@ -84,11 +86,12 @@ public class DeudoresControlador {
     }
 
 
-
+    @Transactional
     @PostMapping("/{id}/solicitar")
     public String solicitar(@PathVariable Long id,
                             @RequestParam List<Long> productoId,
                             @RequestParam List<Integer> cantidad) {
+
         Deudor deudor = deudorService.obtener(id).orElseThrow();
 
         MovimientoCredito movimiento = new MovimientoCredito();
@@ -97,8 +100,17 @@ public class DeudoresControlador {
 
         BigDecimal total = BigDecimal.ZERO;
 
+        // Optimización: una sola consulta para todos los productos
+        List<Productos> productos = productosRepo.findAllById(productoId);
+        Map<Long, Productos> productoMap = productos.stream()
+                .collect(Collectors.toMap(Productos::getId, p -> p));
+
         for (int i = 0; i < productoId.size(); i++) {
-            Productos producto = productosRepo.findById(productoId.get(i)).orElseThrow();
+            Productos producto = productoMap.get(productoId.get(i));
+            if (producto == null) {
+                throw new RuntimeException("Producto no encontrado con ID: " + productoId.get(i));
+            }
+
             int qty = cantidad.get(i);
             BigDecimal precio = producto.getCosto();
 
@@ -118,6 +130,7 @@ public class DeudoresControlador {
         return "redirect:/deudores/" + id;
     }
 
+    @Transactional
     @PostMapping("/{id}/abonar")
     public String abonar(@PathVariable Long id,
                          @RequestParam BigDecimal monto,
@@ -149,7 +162,7 @@ public class DeudoresControlador {
     }
 
 
-
+    @Transactional
     @PostMapping("/{id}/liquidar")
     public String liquidar(@PathVariable Long id,
                            @RequestParam Compra.FormaPago metodoPago) {
@@ -198,6 +211,7 @@ public class DeudoresControlador {
         return "deudores/seleccionar";
     }
 
+    @Transactional
     @GetMapping("/asignar/{id}")
     public String asignarDeuda(@PathVariable Long id, HttpSession session) {
         List<Map<String, Object>> carrito = (List<Map<String, Object>>) session.getAttribute("carritoDeuda");

@@ -15,7 +15,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-
 @Controller
 public class FinDiaControlador {
 
@@ -77,6 +76,7 @@ public class FinDiaControlador {
         return "redirect:/findia";
     }
 
+    @Transactional(readOnly = true)
     @GetMapping("/iniciar-fin-dia")
     public String iniciarFinDia(
             Authentication authentication,
@@ -214,7 +214,7 @@ public class FinDiaControlador {
         return "redirect:/iniciar-fin-dia?success=true";
     }
 
-
+    @Transactional(readOnly = true)
     @GetMapping("/reportes-fin-dia")
     public String verReportes(Authentication authentication, Model model) throws JsonProcessingException {
         if (authentication != null && authentication.getPrincipal() instanceof Usuarios usuario) {
@@ -296,7 +296,7 @@ public class FinDiaControlador {
         return "fin_dia/reportes_fin_dia";
     }
 
-
+    @Transactional(readOnly = true)
     @GetMapping("/reporte-diario")
     public void generarReporteDiario(HttpServletResponse response) throws Exception {
         LocalDate hoy = LocalDate.now();
@@ -454,7 +454,6 @@ public class FinDiaControlador {
     }
 
 
-
     @GetMapping("/descargar-reporte/{nombre}")
     public void descargarReporte(@PathVariable String nombre, HttpServletResponse response) throws IOException {
         File archivo = new File("archivos/reportes/" + nombre);
@@ -468,6 +467,7 @@ public class FinDiaControlador {
         }
     }
 
+    @Transactional
     @PostMapping("/api/registrar-gasto")
     @ResponseBody
     public ResponseEntity<?> registrarGastoAjax(
@@ -536,8 +536,4 @@ public class FinDiaControlador {
             table.addCell(cell);
         }
     }
-
-
-
-        
 }

@@ -7,6 +7,7 @@ import com.example.tienda.modelo.Usuarios;
 import com.example.tienda.repositorio.BovedaRepositorio;
 import com.example.tienda.repositorio.GastoProveedorRepositorio;
 import com.example.tienda.repositorio.RetiroBovedaRepositorio;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -46,6 +47,7 @@ public class BovedaControlador {
 
     }
 
+    @Transactional
     @PostMapping("/boveda/modificar")
     public String modificarBoveda(
             @RequestParam BigDecimal nuevoTotal,
@@ -95,8 +97,7 @@ public class BovedaControlador {
         return "redirect:/boveda";
     }
 
-
-
+    @Transactional
     @PostMapping("/boveda/retirar")
     public String retirarDeBoveda(
             @RequestParam BigDecimal montoRetiro,
